@@ -27,6 +27,13 @@ const Customer = db.define(
     }
 );
 
-Customer.sync({});
+Customer.removeAttribute('id');
+Customer.associate = function (models) {
+    // associations can be defined here
+    Customer.belongsTo(models.Token, {
+        foreignKey: 'customer_id',
+        as: 'token'
+    })
+};
 
 module.exports = Customer;

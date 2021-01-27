@@ -42,4 +42,41 @@ userRouter.get('/:id', async (req, res) => {
     }
 });
 
+// updateById
+userRouter.put('/:id', async (req, res) => {
+    try {
+        const {
+            email,
+            name,
+            password
+        } = req.body;
+
+        const id = req.params.id
+
+        const saltRounds = 10;
+        const hashedPw = await bcrypt.hash(password, saltRounds);
+
+        await Customer.update({
+            email: email,
+            name: name,
+            password: hashedPw
+        }, {
+            where: {
+                customer_id: id
+            }
+        })
+
+        res.status(200).json({
+            status: res.statusCode,
+            message: 'Berhasil Mengubah Data'
+        })
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({
+            message: err.message
+        });
+    }
+});
+
 module.exports = userRouter;

@@ -11,7 +11,7 @@ app.use(express.urlencoded({
 }));
 
 app.use('/api/v1/', authRouter);
-app.use('/api/v1/user', userRouter);
+app.use('/api/v1/customer', userRouter);
 
 db.authenticate().then(() => console.log("Connection to db success"));
 

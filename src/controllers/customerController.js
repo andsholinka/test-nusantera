@@ -79,4 +79,26 @@ userRouter.put('/:id', async (req, res) => {
     }
 });
 
+// deleteById
+userRouter.delete('/:id', async (req, res) => {
+    try {
+        await Customer.destroy({
+            where: {
+                customer_id: req.params.id
+            }
+        })
+
+        res.status(200).json({
+            status: res.statusCode,
+            message: 'Berhasil Mengapus Data'
+        })
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({
+            message: err.message
+        });
+    }
+});
+
 module.exports = userRouter;

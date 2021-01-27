@@ -143,4 +143,48 @@ authRouter.post('/login', async (req, res) => {
     }
 });
 
+// Logout
+authRouter.post('/logout', async (req, res) => {
+
+    try {
+        const dataToken = req.headers['authorization']
+        if (!dataToken) return res.status(401).send({
+            status: res.statusCode,
+            message: 'No token provided.'
+        });
+
+        await Token.findOne({
+            where: {
+                token: dataToken
+            }
+        }).then(data => {
+            if (data[0] === 0) {
+                res.status(401).send({
+                    status: res.statusCode,
+                    message: "Failed to authenticate token",
+                });
+            } else {
+                Token.destroy({
+                    where: {
+                        customer_id: data.customer_id
+                    }
+                }).then(() => {
+                    res.send({
+                        status: res.statusCode,
+                        message: "User Logout Successfully",
+                    })
+                })
+            }
+        }).catch((error) => res.status(401).send({
+            status: res.statusCode,
+            message: "Failed to authenticate token"
+        }));
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({
+            message: err.message
+        });
+    }
+});
+
 module.exports = authRouter;

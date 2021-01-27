@@ -24,4 +24,22 @@ userRouter.get('/', async (req, res) => {
     }
 });
 
+// getCustomerById
+userRouter.get('/:id', async (req, res) => {
+    try {
+        const user = await Customer.findOne({
+            where: {
+                customer_id: req.params.id
+            }
+        })
+        res.json(user);
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({
+            message: err.message
+        });
+    }
+});
+
 module.exports = userRouter;

@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const db = require("./src/config/db");
 const authRouter = require('./src/middleware/auth')
+const userRouter = require('./src/controllers/customerController')
 
 require('dotenv/config')
 
@@ -10,6 +11,7 @@ app.use(express.urlencoded({
 }));
 
 app.use('/api/v1/', authRouter);
+app.use('/api/v1/user', userRouter);
 
 db.authenticate().then(() => console.log("Connection to db success"));
 

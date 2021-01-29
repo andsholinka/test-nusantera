@@ -2,46 +2,28 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const Customer = require('../models/Customer');
+const Driver = require('../models/Driver');
 const Token = require('../models/Token');
 require('dotenv/config')
 
-const {
-    registerValidation,
-    loginValidation
-} = require('../config/validation')
+var driverRouter = express.Router();
 
-var authRouter = express.Router();
-
-authRouter.use(bodyParser.urlencoded({
+driverRouter.use(bodyParser.urlencoded({
     extended: false
 }));
-authRouter.use(bodyParser.json());
+driverRouter.use(bodyParser.json());
 
 // Register 
-authRouter.post('/register', async (req, res) => {
-
-    const {
-        error
-    } = registerValidation(req.body)
-    if (error) return res.status(400).json({
-        status: res.statusCode,
-        message: error.details[0].message
-    })
+driverRouter.post('/register', async (req, res) => {
 
     try {
-        const {
-            email,
-            name,
-            password,
-        } = req.body;
-
+        const driver = req.body;
         const saltRounds = 10;
-        const hashedPw = await bcrypt.hash(password, saltRounds);
+        const hashedPw = await bcrypt.hash(driver.password, saltRounds);
 
-        const emailDuplicate = await Customer.findOne({
+        const emailDuplicate = await Driver.findOne({
             where: {
-                email: email
+                email: driver.email
             }
         })
 
@@ -51,13 +33,14 @@ authRouter.post('/register', async (req, res) => {
                 message: 'This email already exist'
             });
         } else {
-            const created = await Customer.create({
-                email: email,
-                password: hashedPw,
-                name: name
-            })
 
-            res.json(created);
+            driver.password = hashedPw
+            const created = await Driver.create(driver)
+
+            res.status(201).send({
+                status: res.statusCode,
+                message: "account created successfully",
+            })
         }
     } catch (err) {
         console.error(err.message);
@@ -68,30 +51,22 @@ authRouter.post('/register', async (req, res) => {
 });
 
 // Login 
-authRouter.post('/login', async (req, res) => {
-
-    const {
-        error
-    } = loginValidation(req.body)
-    if (error) return res.status(400).json({
-        status: res.statusCode,
-        message: error.details[0].message
-    })
+driverRouter.post('/login', async (req, res) => {
 
     try {
         // if username exist
-        const customer = await Customer.findOne({
+        const driver = await Driver.findOne({
             where: {
                 email: req.body.email
             }
         })
-        if (!customer) return res.status(400).json({
+        if (!driver) return res.status(400).json({
             status: res.statusCode,
             message: 'Email Anda Salah!'
         })
 
         // check password
-        const validPwd = await bcrypt.compare(req.body.password, customer.password)
+        const validPwd = await bcrypt.compare(req.body.password, driver.password)
         if (!validPwd) return res.status(400).json({
             status: res.statusCode,
             message: 'Password Anda Salah!'
@@ -99,21 +74,21 @@ authRouter.post('/login', async (req, res) => {
 
         // token
         const token = jwt.sign({
-            user_id: customer.customer_id
+            driver_id: driver.driver_id
         }, process.env.SECRET_KEY, {
             expiresIn: 86400
         });
         const tokenData = {
             token: token,
-            customer_id: customer.customer_id,
+            driver_id: driver.driver_id,
         };
 
         Token.update({
-                customer_id: customer.customer_id,
+                driver_id: driver.driver_id,
                 token: token
             }, {
                 where: {
-                    customer_id: customer.customer_id
+                    driver_id: driver.driver_id
                 }
             })
             .then(data => {
@@ -144,7 +119,7 @@ authRouter.post('/login', async (req, res) => {
 });
 
 // Logout
-authRouter.post('/logout', async (req, res) => {
+driverRouter.post('/logout', async (req, res) => {
 
     try {
         const dataToken = req.headers['authorization']
@@ -166,7 +141,7 @@ authRouter.post('/logout', async (req, res) => {
             } else {
                 Token.destroy({
                     where: {
-                        customer_id: data.customer_id
+                        driver_id: data.driver_id
                     }
                 }).then(() => {
                     res.send({
@@ -187,4 +162,4 @@ authRouter.post('/logout', async (req, res) => {
     }
 });
 
-module.exports = authRouter;
+module.exports = driverRouter;

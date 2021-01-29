@@ -2,28 +2,36 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const Merchant = require('../models/Merchant');
+const Customer = require('../models/Customer');
 const Token = require('../models/Token');
 require('dotenv/config')
 
-var merchantRouter = express.Router();
+const {
+    registerValidation,
+    loginValidation
+} = require('../config/validation');
+const {
+    custom
+} = require('@hapi/joi');
 
-merchantRouter.use(bodyParser.urlencoded({
+var customerRouter = express.Router();
+
+customerRouter.use(bodyParser.urlencoded({
     extended: false
 }));
-merchantRouter.use(bodyParser.json());
+customerRouter.use(bodyParser.json());
 
 // Register 
-merchantRouter.post('/register', async (req, res) => {
+customerRouter.post('/register', async (req, res) => {
 
     try {
-        const merchant = req.body;
+        const customer = req.body;
         const saltRounds = 10;
-        const hashedPw = await bcrypt.hash(merchant.password, saltRounds);
+        const hashedPw = await bcrypt.hash(customer.password, saltRounds);
 
-        const emailDuplicate = await Merchant.findOne({
+        const emailDuplicate = await Customer.findOne({
             where: {
-                email: merchant.email
+                email: customer.email
             }
         })
 
@@ -33,8 +41,9 @@ merchantRouter.post('/register', async (req, res) => {
                 message: 'This email already exist'
             });
         } else {
-            merchant.password = hashedPw
-            const created = await Merchant.create(merchant)
+
+            customer.password = hashedPw
+            const created = await Customer.create(customer)
 
             res.status(201).send({
                 status: res.statusCode,
@@ -50,22 +59,30 @@ merchantRouter.post('/register', async (req, res) => {
 });
 
 // Login 
-merchantRouter.post('/login', async (req, res) => {
+customerRouter.post('/login', async (req, res) => {
+
+    const {
+        error
+    } = loginValidation(req.body)
+    if (error) return res.status(400).json({
+        status: res.statusCode,
+        message: error.details[0].message
+    })
 
     try {
-        // if email exist
-        const merchant = await Merchant.findOne({
+        // if username exist
+        const customer = await Customer.findOne({
             where: {
                 email: req.body.email
             }
         })
-        if (!merchant) return res.status(400).json({
+        if (!customer) return res.status(400).json({
             status: res.statusCode,
             message: 'Email Anda Salah!'
         })
 
         // check password
-        const validPwd = await bcrypt.compare(req.body.password, merchant.password)
+        const validPwd = await bcrypt.compare(req.body.password, customer.password)
         if (!validPwd) return res.status(400).json({
             status: res.statusCode,
             message: 'Password Anda Salah!'
@@ -73,21 +90,21 @@ merchantRouter.post('/login', async (req, res) => {
 
         // token
         const token = jwt.sign({
-            merchant_id: merchant.merchant_id
+            customer_id: customer.customer_id
         }, process.env.SECRET_KEY, {
             expiresIn: 86400
         });
         const tokenData = {
             token: token,
-            merchant_id: merchant.merchant_id,
+            customer_id: customer.customer_id,
         };
 
         Token.update({
-                merchant_id: merchant.merchant_id,
+                customer_id: customer.customer_id,
                 token: token
             }, {
                 where: {
-                    merchant_id: merchant.merchant_id
+                    customer_id: customer.customer_id
                 }
             })
             .then(data => {
@@ -118,7 +135,7 @@ merchantRouter.post('/login', async (req, res) => {
 });
 
 // Logout
-merchantRouter.post('/logout', async (req, res) => {
+customerRouter.post('/logout', async (req, res) => {
 
     try {
         const dataToken = req.headers['authorization']
@@ -140,7 +157,7 @@ merchantRouter.post('/logout', async (req, res) => {
             } else {
                 Token.destroy({
                     where: {
-                        merchant_id: data.merchant_id
+                        customer_id: data.customer_id
                     }
                 }).then(() => {
                     res.send({
@@ -161,4 +178,4 @@ merchantRouter.post('/logout', async (req, res) => {
     }
 });
 
-module.exports = merchantRouter;
+module.exports = customerRouter;

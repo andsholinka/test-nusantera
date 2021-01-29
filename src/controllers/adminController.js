@@ -3,15 +3,15 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const Customer = require('../models/Customer');
 
-var userRouter = express.Router();
+var adminRouter = express.Router();
 
-userRouter.use(bodyParser.urlencoded({
+adminRouter.use(bodyParser.urlencoded({
     extended: false
 }));
-userRouter.use(bodyParser.json());
+adminRouter.use(bodyParser.json());
 
 // getAllCustomers
-userRouter.get('/', async (req, res) => {
+adminRouter.get('/', async (req, res) => {
     try {
         const getAllUser = await Customer.findAll({})
         res.json(getAllUser);
@@ -25,7 +25,7 @@ userRouter.get('/', async (req, res) => {
 });
 
 // getCustomerById
-userRouter.get('/:id', async (req, res) => {
+adminRouter.get('/:id', async (req, res) => {
     try {
         const user = await Customer.findOne({
             where: {
@@ -43,7 +43,7 @@ userRouter.get('/:id', async (req, res) => {
 });
 
 // updateById
-userRouter.put('/:id', async (req, res) => {
+adminRouter.put('/:id', async (req, res) => {
     try {
         const {
             email,
@@ -80,7 +80,7 @@ userRouter.put('/:id', async (req, res) => {
 });
 
 // deleteById
-userRouter.delete('/:id', async (req, res) => {
+adminRouter.delete('/:id', async (req, res) => {
     try {
         await Customer.destroy({
             where: {
@@ -101,4 +101,4 @@ userRouter.delete('/:id', async (req, res) => {
     }
 });
 
-module.exports = userRouter;
+module.exports = adminRouter;

@@ -1,9 +1,12 @@
 const express = require('express');
 const app = express();
 const db = require("./src/config/db");
-const authRouter = require('./src/middleware/auth')
+const adminRouter = require('./src/controllers/adminController')
+const customerRouter = require('./src/middleware/customer')
 const merchantRouter = require('./src/middleware/merchant')
-const userRouter = require('./src/controllers/customerController')
+const driverRouter = require('./src/middleware/driver')
+const productRouter = require('./src/controllers/productController')
+const orderRouter = require('./src/controllers/orderController')
 
 require('dotenv/config')
 
@@ -11,9 +14,12 @@ app.use(express.urlencoded({
     extended: true
 }));
 
-app.use('/api/v1/', authRouter);
+app.use('/api/v1/admin', adminRouter);
+app.use('/api/v1/customer', customerRouter);
 app.use('/api/v1/merchant', merchantRouter);
-app.use('/api/v1/customer', userRouter);
+app.use('/api/v1/driver', driverRouter);
+app.use('/api/v1/product', productRouter);
+app.use('/api/v1/order', orderRouter);
 
 db.authenticate().then(() => console.log("Connection to db success"));
 

@@ -22,6 +22,16 @@ const Customer = db.define(
         password: {
             type: Sequelize.STRING
         },
+        role: {
+            type: Sequelize.STRING,
+            defaultValue: '0'
+        },
+        address: {
+            type: Sequelize.STRING
+        },
+        phone: {
+            type: Sequelize.STRING
+        },
     }, {
         freezeTableName: true
     }

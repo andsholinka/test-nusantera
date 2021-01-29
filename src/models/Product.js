@@ -4,25 +4,25 @@ const {
 // const sequelize = require('sequelize');
 const db = require("../config/db");
 
-const Token = db.define(
-    "Token", {
-        token_id: {
+const Product = db.define(
+    "Product", {
+        product_id: {
             allowNull: false,
             autoIncrement: true,
             primaryKey: true,
             unique: true,
             type: Sequelize.INTEGER
         },
-        customer_id: {
-            type: Sequelize.INTEGER
-        },
         merchant_id: {
             type: Sequelize.INTEGER
         },
-        driver_id: {
+        name_product: {
+            type: Sequelize.STRING
+        },
+        price_product: {
             type: Sequelize.INTEGER
         },
-        token: {
+        category_product: {
             type: Sequelize.STRING
         },
     }, {
@@ -30,9 +30,9 @@ const Token = db.define(
     }
 );
 
-Token.removeAttribute('id');
-Token.associate = function (models) {
+Product.removeAttribute('id');
+Product.associate = function (models) {
     // associations can be defined here
 };
 
-module.exports = Token;
+module.exports = Product;

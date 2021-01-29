@@ -4,9 +4,9 @@ const {
 // const sequelize = require('sequelize');
 const db = require("../config/db");
 
-const Merchant = db.define(
-    "Merchant", {
-        merchant_id: {
+const Driver = db.define(
+    "Driver", {
+        driver_id: {
             allowNull: false,
             autoIncrement: true,
             primaryKey: true,
@@ -22,15 +22,15 @@ const Merchant = db.define(
         password: {
             type: Sequelize.STRING
         },
-        store_name: {
-            type: Sequelize.STRING
-        },
         address: {
             type: Sequelize.STRING
         },
         role: {
             type: Sequelize.STRING,
-            defaultValue: '1'
+            defaultValue: '2'
+        },
+        license_plates: {
+            type: Sequelize.STRING
         },
         phone: {
             type: Sequelize.STRING
@@ -40,13 +40,9 @@ const Merchant = db.define(
     }
 );
 
-Merchant.removeAttribute('id');
-Merchant.associate = function (models) {
+Driver.removeAttribute('id');
+Driver.associate = function (models) {
     // associations can be defined here
-    Customer.belongsTo(models.Product, {
-        foreignKey: 'merchant_id',
-        as: 'name'
-    })
 };
 
-module.exports = Merchant;
+module.exports = Driver;

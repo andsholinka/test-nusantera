@@ -4,35 +4,37 @@ const {
 // const sequelize = require('sequelize');
 const db = require("../config/db");
 
-const Merchant = db.define(
-    "Merchant", {
-        merchant_id: {
+const Order = db.define(
+    "Order", {
+        order_id: {
             allowNull: false,
             autoIncrement: true,
             primaryKey: true,
+            unique: true,
             type: Sequelize.INTEGER
         },
-        name: {
+        customer_name: {
             type: Sequelize.STRING
         },
-        email: {
-            unique: true,
+        customer_phone: {
             type: Sequelize.STRING
         },
-        password: {
+        customer_address: {
+            type: Sequelize.STRING
+        },
+        bucket_id: {
+            type: Sequelize.STRING
+        },
+        qty: {
+            type: Sequelize.INTEGER
+        },
+        note: {
             type: Sequelize.STRING
         },
         store_name: {
             type: Sequelize.STRING
         },
-        address: {
-            type: Sequelize.STRING
-        },
-        role: {
-            type: Sequelize.STRING,
-            defaultValue: '1'
-        },
-        phone: {
+        merchant_address: {
             type: Sequelize.STRING
         },
     }, {
@@ -40,13 +42,9 @@ const Merchant = db.define(
     }
 );
 
-Merchant.removeAttribute('id');
-Merchant.associate = function (models) {
+Order.removeAttribute('id');
+Order.associate = function (models) {
     // associations can be defined here
-    Customer.belongsTo(models.Product, {
-        foreignKey: 'merchant_id',
-        as: 'name'
-    })
 };
 
-module.exports = Merchant;
+module.exports = Order;

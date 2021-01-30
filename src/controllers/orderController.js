@@ -15,7 +15,7 @@ orderRouter.get('/', async (req, res) => {
     try {
         const order = await Order.findAll({})
         res.json(order);
-        // console.log(User)
+
     } catch (err) {
         console.error(err.message);
         res.status(500).json({

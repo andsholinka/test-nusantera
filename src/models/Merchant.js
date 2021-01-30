@@ -44,8 +44,8 @@ Merchant.removeAttribute('id');
 Merchant.associate = function (models) {
     // associations can be defined here
     Customer.belongsTo(models.Product, {
-        foreignKey: 'merchant_id',
-        as: 'name'
+        foreignKey: 'user_id',
+        as: 'token'
     })
 };
 

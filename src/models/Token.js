@@ -13,6 +13,9 @@ const Token = db.define(
             unique: true,
             type: Sequelize.INTEGER
         },
+        user_id: {
+            type: Sequelize.INTEGER
+        },
         customer_id: {
             type: Sequelize.INTEGER
         },

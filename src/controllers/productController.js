@@ -46,10 +46,7 @@ productRouter.post('/add-product', async (req, res) => {
                 product.merchant_id = decoded.merchant_id
                 const created = await Product.create(product)
 
-                res.status(201).send({
-                    status: res.statusCode,
-                    message: "product created successfully",
-                })
+                res.status(201).json(created)
 
             } catch (err) {
                 console.error(err.message);
@@ -66,54 +63,138 @@ productRouter.post('/add-product', async (req, res) => {
     });
 });
 
-// getAllProducts
+// getAllProducts (customer only)
 productRouter.get('/products', async (req, res) => {
-    try {
-        const getAllProduct = await Product.findAll({})
-        res.json(getAllProduct);
-        // console.log(User)
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({
-            message: err.message
+
+    var token = req.headers['authorization'];
+    if (!token) return res.status(401).send({
+        auth: false,
+        message: 'No token provided.'
+    });
+
+    jwt.verify(token, process.env.SECRET_KEY, async function (err, decoded) {
+        if (err) return res.status(401).send({
+            auth: false,
+            message: 'Failed to authenticate token.'
         });
-    }
+        // console.log(decoded);
+        const customer = await Customer.findOne({
+            where: {
+                customer_id: decoded.customer_id
+            }
+        })
+
+        if (customer.role == 0) {
+
+            try {
+                const getAllProduct = await Product.findAll({})
+                res.json(getAllProduct);
+                // console.log(User)
+            } catch (err) {
+                console.error(err.message);
+                res.status(500).json({
+                    message: err.message
+                });
+            }
+        } else(
+            res.status(401).send({
+                status: res.statusCode,
+                message: "has no authority",
+            })
+        )
+    });
 });
 
-// getProductById
+// getProductById (customer only)
 productRouter.get('/:id', async (req, res) => {
-    try {
-        const product = await Product.findOne({
+
+    var token = req.headers['authorization'];
+    if (!token) return res.status(401).send({
+        auth: false,
+        message: 'No token provided.'
+    });
+
+    jwt.verify(token, process.env.SECRET_KEY, async function (err, decoded) {
+        if (err) return res.status(401).send({
+            auth: false,
+            message: 'Failed to authenticate token.'
+        });
+        // console.log(decoded);
+        const customer = await Customer.findOne({
             where: {
-                product_id: req.params.id
+                customer_id: decoded.customer_id
             }
         })
-        res.json(product);
 
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({
-            message: err.message
-        });
-    }
+        if (customer.role == 0) {
+
+            try {
+                const product = await Product.findOne({
+                    where: {
+                        product_id: req.params.id
+                    }
+                })
+                res.json(product);
+
+            } catch (err) {
+                console.error(err.message);
+                res.status(500).json({
+                    message: err.message
+                });
+            }
+        } else(
+            res.status(401).send({
+                status: res.statusCode,
+                message: "has no authority",
+            })
+        )
+    });
 });
 
-// getProductByCategoty
+// getProductByCategoty (customer only)
 productRouter.get('/', async (req, res) => {
-    try {
-        const product = await Product.findOne({
+
+    var token = req.headers['authorization'];
+    if (!token) return res.status(401).send({
+        auth: false,
+        message: 'No token provided.'
+    });
+
+    jwt.verify(token, process.env.SECRET_KEY, async function (err, decoded) {
+        if (err) return res.status(401).send({
+            auth: false,
+            message: 'Failed to authenticate token.'
+        });
+        // console.log(decoded);
+        const customer = await Customer.findOne({
             where: {
-                category_product: req.query.category
+                customer_id: decoded.customer_id
             }
         })
-        res.json(product);
 
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({
-            message: err.message
-        });
-    }
+        if (customer.role == 0) {
+
+            try {
+                const product = await Product.findAll({
+                    where: {
+                        category_product: req.query.category
+                    }
+                })
+                res.json(product);
+
+            } catch (err) {
+                console.error(err.message);
+                res.status(500).json({
+                    message: err.message
+                });
+            }
+        } else(
+            res.status(401).send({
+                status: res.statusCode,
+                message: "has no authority",
+            })
+        )
+    });
 });
 
 // add to bucket (customer only)
@@ -139,18 +220,14 @@ productRouter.post('/bucket/:id', async (req, res) => {
 
         if (customer.role == 0) {
 
-            const bucker = req.body;
+            const bucket = req.body;
 
             try {
-                bucker.product_id = req.params.id
+                bucket.product_id = req.params.id
 
-                await Bucket.create(bucker)
+                const created = await Bucket.create(bucket)
 
-                res.status(201).send({
-                    status: res.statusCode,
-                    message: "add to bucket successfully",
-                })
-
+                res.status(201).json(created)
 
             } catch (err) {
                 // console.error(err.message);
@@ -225,13 +302,9 @@ productRouter.post('/order/:id', async (req, res) => {
 
                 // console.log(merchant.address);
 
-                await Order.create(order)
+                const created = await Order.create(order)
 
-                res.status(201).send({
-                    status: res.statusCode,
-                    message: "order created successfully",
-                })
-
+                res.status(201).json(created)
 
             } catch (err) {
                 // console.error(err.message);

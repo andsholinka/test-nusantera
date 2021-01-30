@@ -6,6 +6,11 @@ const Merchant = require('../models/Merchant');
 const Token = require('../models/Token');
 require('dotenv/config')
 
+const {
+    merchantRegisterValidation,
+    loginValidation
+} = require('../config/validation');
+
 var merchantRouter = express.Router();
 
 merchantRouter.use(bodyParser.urlencoded({
@@ -15,6 +20,14 @@ merchantRouter.use(bodyParser.json());
 
 // Register 
 merchantRouter.post('/register', async (req, res) => {
+
+    const {
+        error
+    } = merchantRegisterValidation(req.body)
+    if (error) return res.status(400).json({
+        status: res.statusCode,
+        message: error.details[0].message
+    })
 
     try {
         const merchant = req.body;
@@ -36,10 +49,8 @@ merchantRouter.post('/register', async (req, res) => {
             merchant.password = hashedPw
             const created = await Merchant.create(merchant)
 
-            res.status(201).send({
-                status: res.statusCode,
-                message: "account created successfully",
-            })
+            res.status(201).json(created)
+
         }
     } catch (err) {
         console.error(err.message);
@@ -51,6 +62,14 @@ merchantRouter.post('/register', async (req, res) => {
 
 // Login 
 merchantRouter.post('/login', async (req, res) => {
+
+    const {
+        error
+    } = loginValidation(req.body)
+    if (error) return res.status(400).json({
+        status: res.statusCode,
+        message: error.details[0].message
+    })
 
     try {
         // if email exist

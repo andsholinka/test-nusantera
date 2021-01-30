@@ -7,12 +7,9 @@ const Token = require('../models/Token');
 require('dotenv/config')
 
 const {
-    registerValidation,
+    customerRegisterValidation,
     loginValidation
 } = require('../config/validation');
-const {
-    custom
-} = require('@hapi/joi');
 
 var customerRouter = express.Router();
 
@@ -23,6 +20,14 @@ customerRouter.use(bodyParser.json());
 
 // Register 
 customerRouter.post('/register', async (req, res) => {
+
+    const {
+        error
+    } = customerRegisterValidation(req.body)
+    if (error) return res.status(400).json({
+        status: res.statusCode,
+        message: error.details[0].message
+    })
 
     try {
         const customer = req.body;
@@ -45,10 +50,7 @@ customerRouter.post('/register', async (req, res) => {
             customer.password = hashedPw
             const created = await Customer.create(customer)
 
-            res.status(201).send({
-                status: res.statusCode,
-                message: "account created successfully",
-            })
+            res.status(201).json(created)
         }
     } catch (err) {
         console.error(err.message);

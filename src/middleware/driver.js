@@ -6,6 +6,11 @@ const Driver = require('../models/Driver');
 const Token = require('../models/Token');
 require('dotenv/config')
 
+const {
+    driverRegisterValidation,
+    loginValidation
+} = require('../config/validation');
+
 var driverRouter = express.Router();
 
 driverRouter.use(bodyParser.urlencoded({
@@ -15,6 +20,14 @@ driverRouter.use(bodyParser.json());
 
 // Register 
 driverRouter.post('/register', async (req, res) => {
+
+    const {
+        error
+    } = driverRegisterValidation(req.body)
+    if (error) return res.status(400).json({
+        status: res.statusCode,
+        message: error.details[0].message
+    })
 
     try {
         const driver = req.body;
@@ -37,10 +50,8 @@ driverRouter.post('/register', async (req, res) => {
             driver.password = hashedPw
             const created = await Driver.create(driver)
 
-            res.status(201).send({
-                status: res.statusCode,
-                message: "account created successfully",
-            })
+            res.status(201).json(created)
+
         }
     } catch (err) {
         console.error(err.message);
@@ -53,8 +64,15 @@ driverRouter.post('/register', async (req, res) => {
 // Login 
 driverRouter.post('/login', async (req, res) => {
 
+    const {
+        error
+    } = loginValidation(req.body)
+    if (error) return res.status(400).json({
+        status: res.statusCode,
+        message: error.details[0].message
+    })
+
     try {
-        // if username exist
         const driver = await Driver.findOne({
             where: {
                 email: req.body.email
@@ -71,6 +89,7 @@ driverRouter.post('/login', async (req, res) => {
             status: res.statusCode,
             message: 'Password Anda Salah!'
         })
+        // console.log(driver.driver_id);
 
         // token
         const token = jwt.sign({
@@ -82,7 +101,7 @@ driverRouter.post('/login', async (req, res) => {
             token: token,
             driver_id: driver.driver_id,
         };
-
+        console.log(tokenData);
         Token.update({
                 driver_id: driver.driver_id,
                 token: token

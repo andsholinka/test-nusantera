@@ -16,6 +16,7 @@ const Customer = db.define(
             type: Sequelize.STRING
         },
         email: {
+            email: true,
             unique: true,
             type: Sequelize.STRING
         },
@@ -41,7 +42,7 @@ Customer.removeAttribute('id');
 Customer.associate = function (models) {
     // associations can be defined here
     Customer.belongsTo(models.Token, {
-        foreignKey: 'customer_id',
+        foreignKey: 'user_id',
         as: 'token'
     })
 };

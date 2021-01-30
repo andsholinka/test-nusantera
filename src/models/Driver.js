@@ -43,6 +43,10 @@ const Driver = db.define(
 Driver.removeAttribute('id');
 Driver.associate = function (models) {
     // associations can be defined here
+    Driver.belongsTo(models.Token, {
+        foreignKey: 'driver_id',
+        as: 'token'
+    })
 };
 
 module.exports = Driver;
